@@ -4,7 +4,7 @@ import { Game } from "./Classes.js";
 
 function App() {
   var g = new Game();
-  const colors = ["black", "red", "blue"];
+  const colors = ["black", "red", "blue", "green", "green", "green", "green"];
   return (
     <svg id="svg" height="220" width="220">
       {g.circles.map((c, i) => (
