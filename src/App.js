@@ -1,40 +1,75 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import { Game } from "./Classes.js";
 
 function App() {
-  var g = new Game();
-  const colors = ["black", "red", "blue", "green", "green", "green", "green"];
+  const [activeCircle, setActiveCircle] = useState();
+  const [game, setGame] = useState(new Game());
+  const [xp, setXP] = useState(0);
+  const [yp, setYP] = useState(0);
+  const inputRef = useRef();
+
+  useEffect(() => setActiveCircle(game.giveNextPlay()), []);
+
+  const handleMouse = (e) => {
+    const { clientX, clientY } = e;
+    const rect = inputRef.current.getBoundingClientRect();
+    setXP(clientX - rect.x);
+    setYP(clientY - rect.y);
+  };
+
+  const handleClick = (e) => {
+    const { clientX, clientY } = e;
+    const rect = inputRef.current.getBoundingClientRect();
+    if (
+      Math.abs(clientX - rect.x - activeCircle.xTarget - 110) < 1 &&
+      Math.abs(clientY - rect.y - activeCircle.yTarget - 110) < 1
+    ) {
+      game.executePlay();
+      setActiveCircle(game.play.circle);
+    } else {
+      console.log("beep");
+    }
+  };
+
+  const autoPlay = (e) => {
+    game.executePlay();
+    setActiveCircle(game.play.circle);
+  };
+
   return (
-    <svg id="svg" height="220" width="220">
-      {g.circles.map((c, i) => (
+    <svg
+      id="svg"
+      height="220"
+      width="220"
+      ref={inputRef}
+      onMouseMove={handleMouse}
+      onClick={handleClick}
+    >
+      {game.circles.map((c, i) =>
+        c.render ? (
+          <circle
+            transform="translate(110,110)"
+            key={i}
+            r={c.radius}
+            cx={c.xTarget}
+            cy={c.yTarget}
+            stroke="black"
+            fill="none"
+          />
+        ) : null
+      )}
+      {activeCircle ? (
         <circle
-          transform="translate(110,110)"
-          key={i}
-          r={c.radius}
-          cx={c.xTarget}
-          cy={c.yTarget}
-          stroke={colors[i]}
+          key={activeCircle.id}
+          r={activeCircle.radius}
+          cx={xp}
+          cy={yp}
+          stroke="pink"
           fill="none"
         />
-      ))}
+      ) : null}
     </svg>
-    // <div className="App">
-    //   <header className="App-header">
-    //     <img src={logo} className="App-logo" alt="logo" />
-    //     <p>
-    //       Edit <code>src/App.js</code> and save to reload.
-    //     </p>
-    //     <a
-    //       className="App-link"
-    //       href="https://reactjs.org"
-    //       target="_blank"
-    //       rel="noopener noreferrer"
-    //     >
-    //       Learn React
-    //     </a>
-    //   </header>
-    // </div>
   );
 }
 

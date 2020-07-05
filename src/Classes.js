@@ -1,3 +1,5 @@
+const randomChoice = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
 const solveDescartes = (a, b, c) => {
   const X = 1 / a + 1 / b + 1 / c;
   const Y = 1 / a ** 2 + 1 / b ** 2 + 1 / c ** 2;
@@ -13,10 +15,10 @@ const pairAndRadiusTwoPossibilities = (
 ) => {
   const a = firstCircle.xTarget;
   const b = firstCircle.yTarget;
-  const r = firstCircle.radius;
+  const r = firstCircle.id !== 0 ? firstCircle.radius : -firstCircle.radius;
   const c = secondCircle.xTarget;
   const d = secondCircle.yTarget;
-  const s = secondCircle.radius;
+  const s = secondCircle.id !== 0 ? secondCircle.radius : -secondCircle.radius;
   const t = newRadius;
   const F =
     ((t + s) ** 2 - (r + t) ** 2 - (c - a) ** 2 - (d - b) ** 2) / (2 * (a - c));
@@ -61,7 +63,7 @@ export class Circle {
     this.theta =
       (yTarget >= 0 ? 1 : -1) *
       Math.acos(xTarget / Math.sqrt(xTarget ** 2 + yTarget ** 2)); // check
-    this.rendered = false;
+    this.render = false;
   }
 
   isTangentTo = (anotherCircle) =>
@@ -88,7 +90,7 @@ export class Triple {
   }
 
   updateOpen = () => {
-    this.partOfOpenPlay = this.quads.some((q) => q.completed);
+    this.partOfOpenPlay = !this.quads.every((q) => q.completed);
   };
 }
 
@@ -101,9 +103,9 @@ export class Quad {
   diffQuadMinusTriple = (triple) => {
     const quadIDs = getCircleIDs(this.id);
     const tripleIDs = getCircleIDs(triple.id);
-    const val = quadIDs.filter((x) => tripleIDs.includes(x));
+    const val = quadIDs.filter((x) => !tripleIDs.includes(x));
     if (val.length === 1) {
-      return val[0];
+      return parseInt(val[0]);
     } else {
       throw (
         "Quad " +
@@ -119,6 +121,7 @@ export class Quad {
 
 export class Game {
   constructor() {
+    console.log("New Game");
     this.circles = [];
     this.triples = [];
     this.quads = [];
@@ -141,7 +144,7 @@ export class Game {
 
     const t = Math.max((outerRadius - r) * Math.random(), minRadius); //radius of second circle
     const signs = [1, -1];
-    const sign = signs[Math.floor(Math.random() * signs.length)];
+    const sign = randomChoice(signs);
     let tx =
       ((outerRadius - r) ** 2 + (outerRadius - t) ** 2 - (t + r) ** 2) /
       (2 * (outerRadius - r));
@@ -173,28 +176,87 @@ export class Game {
     this.quads = quads;
     var firstTriple = new Triple([bigCircle, firstCircle, secondCircle]);
     firstTriple.setQuads(quads);
+    firstTriple.maxradiusplay = Math.max(...this.twoRadii(firstTriple));
     this.triples.push(firstTriple);
+    [bigCircle, firstCircle, secondCircle].map((c) => {
+      c.render = true;
+      return;
+    });
   }
 
-  getCircleByID = (id) => this.circles.filter((c) => (c.id = id))[0];
+  giveNextPlay = () => {
+    let T =
+      Math.random() < 0.75
+        ? this.triples
+            .filter((t) => t.partOfOpenPlay)
+            .sort((a, b) => b.maxradiusplay - a.maxradiusplay)[0]
+        : randomChoice(this.triples.filter((t) => t.partOfOpenPlay));
+    let Q = randomChoice(T.quads.filter((q) => !q.completed));
+    let C = this.getCircleByID(Q.diffQuadMinusTriple(T));
+    let play = { circle: C, triple: T, quad: Q };
+    this.play = play;
+    return C;
+  };
+
+  executePlay = () => {
+    this.plays = this.plays + 1;
+    // render circle
+    this.play.circle.render = true;
+    // update quad
+    this.play.quad.completed = true;
+    // update triple
+    this.play.triple.updateOpen();
+    // generate new quads and stuff
+    var three = getCircleIDs(this.play.triple.id).map((i) =>
+      this.getCircleByID(i)
+    );
+    var [A, B, C] = three;
+    [A, B, C].map((excluded) => {
+      var [otherOne, otherTwo] = three
+        .filter((x) => x.id !== excluded.id)
+        .sort((a, b) => a.id - b.id);
+      var newTriple = new Triple([otherOne, otherTwo, this.play.circle]);
+      const newRadius = this.twoRadii(newTriple).filter(
+        (r) =>
+          !approxEqual(
+            r,
+            excluded.id !== 0 ? excluded.radius : -excluded.radius
+          )
+      )[0];
+      pairAndRadiusTwoPossibilities(otherOne, otherTwo, newRadius).map((c) => {
+        var newCircle = new Circle(this.nextID(), newRadius, c.x, c.y);
+        if (newCircle.isTangentTo(this.play.circle)) {
+          var newQuad = new Quad([
+            otherOne,
+            otherTwo,
+            this.play.circle,
+            newCircle,
+          ]);
+          // don't need to add the other quad do the triple
+          newTriple.quads = [newQuad];
+          this.triples.push(newTriple);
+          this.quads.push(newQuad);
+          this.circles.push(newCircle);
+          newTriple.maxradiusplay = this.getCircleByID(
+            newQuad.diffQuadMinusTriple(newTriple)
+          ).radius;
+        }
+      });
+    });
+    this.giveNextPlay();
+  };
+
+  getCircleByID = (id) => this.circles.filter((c) => c.id === id)[0];
 
   twoRadii = (triple) => {
     // given triple of MTCs, returns the radii of the two MTCs by Descartes' theorem
     const circleIDs = getCircleIDs(triple.id);
-    const radii = circleIDs.map((id) => this.getCircleByID(id).radius);
+    const radii = circleIDs.map((id) =>
+      id !== 0 ? this.getCircleByID(id).radius : -this.getCircleByID(id).radius
+    );
     const [a, b, c] = radii;
+    return solveDescartes(a, b, c);
   };
+
   nextID = () => this.circles.length;
 }
-
-var a = new Circle(1, 2, 3, 4);
-var b = new Circle(2, 2, 3, 4);
-var c = new Circle(3, 2, 3, 4);
-var d = new Circle(4, 2, 3, 4);
-var e = new Circle(5, 2, 3, 4);
-
-var q = new Quad([d, c, b, a]);
-var p = new Quad([e, c, b, a]);
-
-var t = new Triple([c, a, b]);
-t.setQuads([q, p]);
