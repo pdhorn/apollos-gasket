@@ -120,15 +120,15 @@ export class Quad {
 }
 
 export class Game {
-  constructor() {
+  constructor(pixels) {
     console.log("New Game");
     this.circles = [];
     this.triples = [];
     this.quads = [];
     this.plays = 0;
 
-    const outerRadius = 100;
-    const minRadius = 20;
+    const outerRadius = (pixels - 20) / 2;
+    const minRadius = 30;
     var bigCircle = new Circle(0, outerRadius, 0, 0);
     this.circles.push(bigCircle);
 
