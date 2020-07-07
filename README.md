@@ -1,3 +1,7 @@
+# Apollonian Gasket Game
+
+Three circles that are tangent to each other determine two possible circles that are tangent to the three. This game gives you three mutually tangent circles and asks you to place a fourth one. As the game progresses, there are more and more possibilities...and things get smaller.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

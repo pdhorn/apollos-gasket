@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import { Game } from "./Classes.js";
+import Beep from "./Beep.js";
 
 function App() {
   const [activeCircle, setActiveCircle] = useState();
@@ -28,7 +29,7 @@ function App() {
       game.executePlay();
       setActiveCircle(game.play.circle);
     } else {
-      console.log("beep");
+      Beep();
     }
   };
 
