@@ -107,13 +107,13 @@ export class Quad {
     if (val.length === 1) {
       return parseInt(val[0]);
     } else {
-      throw (
+      throw RangeError(
         "Quad " +
-        this.id +
-        " contains " +
-        val.length +
-        " circles not in triple " +
-        triple.id
+          this.id +
+          " contains " +
+          val.length +
+          " circles not in triple " +
+          triple.id
       );
     }
   };
@@ -163,15 +163,14 @@ export class Game {
 
     var quads = [];
     [R, S].map((arr) =>
-      pairAndRadiusTwoPossibilities(firstCircle, secondCircle, arr).map(
-        (c, i) => {
-          var z = new Circle(this.nextID(), arr, c.x, c.y);
-          if (z.isTangentTo(bigCircle)) {
-            this.circles.push(z);
-            quads.push(new Quad([bigCircle, firstCircle, secondCircle, z]));
-          }
+      pairAndRadiusTwoPossibilities(firstCircle, secondCircle, arr).map((c) => {
+        var z = new Circle(this.nextID(), arr, c.x, c.y);
+        if (z.isTangentTo(bigCircle)) {
+          this.circles.push(z);
+          quads.push(new Quad([bigCircle, firstCircle, secondCircle, z]));
         }
-      )
+        return true;
+      })
     );
     this.quads = quads;
     var firstTriple = new Triple([bigCircle, firstCircle, secondCircle]);
@@ -180,7 +179,7 @@ export class Game {
     this.triples.push(firstTriple);
     [bigCircle, firstCircle, secondCircle].map((c) => {
       c.render = true;
-      return;
+      return true;
     });
   }
 
@@ -241,7 +240,9 @@ export class Game {
             newQuad.diffQuadMinusTriple(newTriple)
           ).radius;
         }
+        return true;
       });
+      return true;
     });
     this.giveNextPlay();
   };

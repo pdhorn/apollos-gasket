@@ -6,8 +6,8 @@ import Beep from "./Beep.js";
 function App() {
   const [activeCircle, setActiveCircle] = useState();
   const [game, setGame] = useState(new Game());
-  const [xp, setXP] = useState(0);
-  const [yp, setYP] = useState(0);
+  const [xp, setXP] = useState(110);
+  const [yp, setYP] = useState(110);
   const inputRef = useRef();
 
   useEffect(() => setActiveCircle(game.giveNextPlay()), []);
