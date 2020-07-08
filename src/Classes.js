@@ -133,7 +133,7 @@ export class Game {
     this.circles.push(bigCircle);
 
     const theta = 2 * Math.PI * Math.random();
-    const r = minRadius + (outerRadius - 2 * minRadius) * Math.random(); // radius of first circle
+    const r = outerRadius / 3 + (outerRadius / 3) * Math.random(); // radius of first circle
     var firstCircle = new Circle(
       1,
       r,

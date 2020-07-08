@@ -5,7 +5,7 @@ import Beep from "./Beep.js";
 
 function App() {
   const [activeCircle, setActiveCircle] = useState();
-  const svgPixels = Math.min(window.innerHeight - 50, window.innerWidth - 50);
+  const svgPixels = Math.min(window.innerHeight, window.innerWidth) - 80;
   const [game, setGame] = useState(new Game(svgPixels));
   const [xp, setXP] = useState(svgPixels / 2);
   const [yp, setYP] = useState(svgPixels / 2);
@@ -73,7 +73,8 @@ function App() {
         <div
           style={{
             position: "absolute",
-            top: "95%",
+            top: "100%",
+            transform: "translate(0,-100%)",
           }}
         >
           Score: {game.plays}
