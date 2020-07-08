@@ -6,12 +6,18 @@ import Beep from "./Beep.js";
 function App() {
   const [activeCircle, setActiveCircle] = useState();
   const svgPixels = Math.min(window.innerHeight, window.innerWidth) - 80;
-  const [game, setGame] = useState(new Game(svgPixels));
+  const [game, setGame] = useState();
   const [xp, setXP] = useState(svgPixels / 2);
   const [yp, setYP] = useState(svgPixels / 2);
   const inputRef = useRef();
 
-  useEffect(() => setActiveCircle(game.giveNextPlay()), []);
+  useEffect(() => setGame(new Game(svgPixels)), []);
+
+  useEffect(() => {
+    if (game) {
+      setActiveCircle(game.giveNextPlay());
+    }
+  }, [game]);
 
   const handleMouse = (e) => {
     const { clientX, clientY } = e;
@@ -69,54 +75,56 @@ function App() {
           Apollo's Gasket
         </div>
       </div>
-      <div className="App-header">
-        <div
-          style={{
-            position: "absolute",
-            top: "100%",
-            transform: "translate(0,-100%)",
-          }}
-        >
-          Score: {game.plays}
-        </div>
-        <svg
-          id="svg"
-          height={svgPixels}
-          width={svgPixels}
-          ref={inputRef}
-          onMouseMove={handleMouse}
-          onClick={handleClick}
-        >
-          <rect
-            width="100%"
-            height="100%"
-            style={{ fill: "rgb(255,255,255)" }}
-          />
-          {game.circles.map((c, i) =>
-            c.render ? (
+      {game ? (
+        <div className="App-header">
+          <div
+            style={{
+              position: "absolute",
+              top: "100%",
+              transform: "translate(0,-100%)",
+            }}
+          >
+            Score: {game.plays}
+          </div>
+          <svg
+            id="svg"
+            height={svgPixels}
+            width={svgPixels}
+            ref={inputRef}
+            onMouseMove={handleMouse}
+            onClick={handleClick}
+          >
+            <rect
+              width="100%"
+              height="100%"
+              style={{ fill: "rgb(255,255,255)" }}
+            />
+            {game.circles.map((c, i) =>
+              c.render ? (
+                <circle
+                  transform={`translate(${svgPixels / 2},${svgPixels / 2})`}
+                  key={i}
+                  r={c.radius}
+                  cx={c.xTarget}
+                  cy={c.yTarget}
+                  stroke="black"
+                  fill="none"
+                />
+              ) : null
+            )}
+            {activeCircle ? (
               <circle
-                transform={`translate(${svgPixels / 2},${svgPixels / 2})`}
-                key={i}
-                r={c.radius}
-                cx={c.xTarget}
-                cy={c.yTarget}
-                stroke="black"
+                key={activeCircle.id}
+                r={activeCircle.radius}
+                cx={xp}
+                cy={yp}
+                stroke="pink"
                 fill="none"
               />
-            ) : null
-          )}
-          {activeCircle ? (
-            <circle
-              key={activeCircle.id}
-              r={activeCircle.radius}
-              cx={xp}
-              cy={yp}
-              stroke="pink"
-              fill="none"
-            />
-          ) : null}
-        </svg>
-      </div>
+            ) : null}
+          </svg>
+        </div>
+      ) : null}
     </div>
   );
 }
