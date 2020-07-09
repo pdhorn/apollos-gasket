@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
+import ReactDOM from "react-dom";
 import "./App.css";
 import { Game } from "./Classes.js";
 import Beep from "./Beep.js";
+import useModal from "./useModal";
+import "./Modal.css";
+import gasket from "./gasket.png";
 
 function App() {
   const [activeCircle, setActiveCircle] = useState();
@@ -10,6 +14,7 @@ function App() {
   const [xp, setXP] = useState(svgPixels / 2);
   const [yp, setYP] = useState(svgPixels / 2);
   const inputRef = useRef();
+  const [rulesIsShowing, rulesToggle] = useModal();
 
   useEffect(() => setGame(new Game(svgPixels)), []);
 
@@ -46,7 +51,13 @@ function App() {
   };
 
   return (
-    <div>
+    <div
+      onClick={() => {
+        if (rulesIsShowing) {
+          rulesToggle();
+        }
+      }}
+    >
       <div style={{ marginTop: "5px" }}>
         <div
           style={{
@@ -85,6 +96,22 @@ function App() {
             }}
           >
             Score: {game.plays}
+          </div>
+          <div>
+            <button
+              style={{
+                position: "absolute",
+                left: "60%",
+                top: "100%",
+                transform: "translate(0,-100%)",
+                margin: "0",
+                width: "100px",
+                backgroundColor: "white",
+              }}
+              onClick={rulesToggle}
+            >
+              Rules
+            </button>
           </div>
           <svg
             id="svg"
@@ -125,8 +152,45 @@ function App() {
           </svg>
         </div>
       ) : null}
+      <RulesModal isShowing={rulesIsShowing} />
     </div>
   );
 }
+
+const RulesModal = ({ isShowing }) => {
+  return isShowing
+    ? ReactDOM.createPortal(
+        <React.Fragment>
+          <div className="modal-overlay" />
+          <div
+            className="modal-wrapper"
+            aria-modal
+            aria-hidden
+            tabIndex={-1}
+            role="dialog"
+          >
+            <div className="modal">
+              <div className="modal-header">
+                Click the pink circle so it's tangent to three black circles.
+                <br />
+                <br />
+                You will eventually fill out an{" "}
+                <a
+                  href="https://en.wikipedia.org/wiki/Apollonian_gasket"
+                  target="new"
+                >
+                  Apollonian gasket
+                </a>
+                <br />
+                <br />
+                <img src={gasket} width="100%" />
+              </div>
+            </div>
+          </div>
+        </React.Fragment>,
+        document.body
+      )
+    : null;
+};
 
 export default App;
