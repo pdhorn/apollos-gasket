@@ -45,7 +45,18 @@ function App() {
     }
   };
 
-  const autoPlay = (e) => {
+  const autoPlay = () => {
+    const targX = game.play.circle.xTarget;
+    const targY = game.play.circle.yTarget;
+    console.log(Math.abs(targX - xp), Math.abs(targY - yp));
+    // while (Math.abs(targX - xp) > 1 && Math.abs(targY - yp) > 1) {
+    //   setTimeout(() => {
+    //     console.log("while", Math.abs(targX - xp), Math.abs(targY - yp));
+    //     setXP(xp + (targX - xp > 0 ? 1 : -1));
+    //     setYP(yp + (targY - yp > 0 ? 1 : -1));
+    //   }, 100);
+    // }
+
     game.executePlay();
     setActiveCircle(game.play.circle);
   };
@@ -88,68 +99,87 @@ function App() {
       </div>
       {game ? (
         <div className="App-header">
-          <div
-            style={{
-              position: "absolute",
-              top: "100%",
-              transform: "translate(0,-100%)",
-            }}
-          >
-            Score: {game.plays}
-          </div>
           <div>
-            <button
+            <div
               style={{
                 position: "absolute",
-                left: "60%",
+                left: "50%",
                 top: "100%",
-                transform: "translate(0,-100%)",
-                margin: "0",
-                width: "100px",
-                backgroundColor: "white",
+                transform: "translate(-50%,-100%)",
               }}
-              onClick={rulesToggle}
             >
-              Rules
-            </button>
-          </div>
-          <svg
-            id="svg"
-            height={svgPixels}
-            width={svgPixels}
-            ref={inputRef}
-            onMouseMove={handleMouse}
-            onClick={handleClick}
-          >
-            <rect
-              width="100%"
-              height="100%"
-              style={{ fill: "rgb(255,255,255)" }}
-            />
-            {game.circles.map((c, i) =>
-              c.render ? (
+              Score: {game.plays}
+            </div>
+            <div>
+              <div>
+                <button
+                  style={{
+                    position: "absolute",
+                    left: "0%",
+                    top: "100%",
+                    transform: "translate(50%,-100%)",
+                    margin: "0",
+                    width: "100px",
+                    backgroundColor: "white",
+                  }}
+                  onClick={autoPlay}
+                >
+                  Auto play
+                </button>
+              </div>
+              <button
+                style={{
+                  position: "absolute",
+                  left: "100%",
+                  top: "100%",
+                  transform: "translate(-150%,-100%)",
+                  margin: "0",
+                  width: "100px",
+                  backgroundColor: "white",
+                }}
+                onClick={rulesToggle}
+              >
+                Rules
+              </button>
+            </div>
+            <svg
+              id="svg"
+              height={svgPixels}
+              width={svgPixels}
+              ref={inputRef}
+              onMouseMove={handleMouse}
+              onClick={handleClick}
+            >
+              <rect
+                width="100%"
+                height="100%"
+                style={{ fill: "rgb(255,255,255)" }}
+              />
+              {game.circles.map((c, i) =>
+                c.render ? (
+                  <circle
+                    transform={`translate(${svgPixels / 2},${svgPixels / 2})`}
+                    key={i}
+                    r={c.radius}
+                    cx={c.xTarget}
+                    cy={c.yTarget}
+                    stroke="black"
+                    fill="none"
+                  />
+                ) : null
+              )}
+              {activeCircle ? (
                 <circle
-                  transform={`translate(${svgPixels / 2},${svgPixels / 2})`}
-                  key={i}
-                  r={c.radius}
-                  cx={c.xTarget}
-                  cy={c.yTarget}
-                  stroke="black"
+                  key={activeCircle.id}
+                  r={activeCircle.radius}
+                  cx={xp}
+                  cy={yp}
+                  stroke="pink"
                   fill="none"
                 />
-              ) : null
-            )}
-            {activeCircle ? (
-              <circle
-                key={activeCircle.id}
-                r={activeCircle.radius}
-                cx={xp}
-                cy={yp}
-                stroke="pink"
-                fill="none"
-              />
-            ) : null}
-          </svg>
+              ) : null}
+            </svg>
+          </div>
         </div>
       ) : null}
       <RulesModal isShowing={rulesIsShowing} />
